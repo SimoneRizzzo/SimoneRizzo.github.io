@@ -1,0 +1,269 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: montserrat;
+}
+
+#navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    color: black;
+    text-align: center;
+    
+    /* Define a height for NavBar */
+    height: 60px;
+    transition: 0.5s;
+    /* and a transition time for a smooth appearance */
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-overlay {
+    background-image: url('placeholder.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(25, 53, 81, 0.6);
+    z-index: 2;
+}
+
+.content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 3;
+}
+
+h1 {
+    display: inline-block;
+    font-size: 3em;
+    margin-bottom: 10px;
+    cursor: context-menu;
+}
+
+.titolo:hover {
+    color: #ced78d;
+}
+
+p {
+    font-size: 1.5em;
+}
+
+li {
+    display: inline;
+}
+
+#navbar ul li a {
+    text-decoration: none;
+    color: black;
+    font-size: 18px;
+    padding: 10px 15px;
+    transition: background 0.3s ease-in-out;
+    display: inline-block;
+}
+
+#navbar ul li a:hover {
+    background: #ced78d;
+    border-radius: 5px;
+}
+
+h1:hover {
+    color: #ced78d;
+}
+
+#scrollButton img {
+    margin-top: 10px;
+    padding: 10px 10px;
+    cursor: pointer;
+    width: 40px;  /* Dimensioni dell'immagine */
+    height: auto;  /* Mantiene proporzioni */
+    filter: invert(91%) sepia(89%) saturate(4255%) hue-rotate(180deg) brightness(137%) contrast(100%);
+}
+
+#scrollButton img:hover {
+    filter: invert(98%) sepia(47%) saturate(759%) hue-rotate(7deg) brightness(85%) contrast(99%);
+}
+
+#scrollButton {
+    background: none;
+    border: none;
+}
+
+/* Stili per il form di pubblicazione */
+#articleForm {
+    background-color: white; /* Colore di sfondo chiaro */
+    border: 1px solid #ddd; /* Bordo sottile */
+    border-radius: 8px; /* Angoli arrotondati */
+    padding: 20px; /* Spaziatura interna */
+    margin: 20px 0; /* Margini superiori e inferiori */
+}
+
+#articleForm input, #articleForm textarea {
+    width: 100%; /* Larghezza completa */
+    padding: 10px; /* Spaziatura interna */
+    margin-bottom: 10px; /* Margine inferiore */
+    border: 1px solid #ccc; /* Bordo leggero */
+    border-radius: 4px; /* Angoli arrotondati */
+    box-sizing: border-box; /* Include padding e bordo nella larghezza */
+}
+
+#articleForm button {
+    background-color: white; /* Colore di sfondo del bottone */
+    color: black; /* Colore del testo */
+    border: 1px solid #ccc; /* Nessun bordo */
+    border-radius: 4px; /* Angoli arrotondati */
+    padding: 10px 20px; /* Spaziatura interna */
+    cursor: pointer; /* Indicatore di cursore a mano */
+    font-size: 16px; /* Dimensione del testo */
+}
+
+#articleForm button:hover {
+    background-color: #ced78d; /* Colore di sfondo al passaggio del mouse */
+}
+
+/* Stili per la visualizzazione degli articoli */
+#articlesSection {
+    margin: 20px;
+}
+
+#articlesList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#articlesList > div {
+    background-color: #fff; /* Colore di sfondo bianco */
+    border: 1px solid #ddd; /* Bordo sottile */
+    border-radius: 8px; /* Angoli arrotondati */
+    padding: 20px; /* Spaziatura interna */
+    
+}
+
+#articlesList h2 {
+    margin-top: 0;
+}
+
+#articlesList textarea {
+    width: calc(100% - 22px); /* Larghezza del textarea, tenendo conto del padding */
+    padding: 10px; /* Spaziatura interna */
+    border: 1px solid #ccc; /* Bordo leggero */
+    border-radius: 4px; /* Angoli arrotondati */
+    box-sizing: border-box; /* Include padding e bordo nella larghezza */
+    margin-top: 10px; /* Margine superiore */
+}
+
+#articlesList button {
+    background-color: white; /* Colore di sfondo del bottone */
+    color: black; /* Colore del testo */
+    border: 1px solid #ccc; /* Nessun bordo */
+    border-radius: 4px; /* Angoli arrotondati */
+    padding: 10px 20px; /* Spaziatura interna */
+    cursor: pointer; /* Indicatore di cursore a mano */
+    font-size: 16px; /* Dimensione del testo */
+    margin-top: 10px; /* Margine superiore */
+}
+
+#articlesList button:hover {
+    background-color: #ced78d; /* Colore di sfondo al passaggio del mouse */
+}
+
+/* Stili per i commenti */
+#commentsSection {
+    margin-top: 20px;
+}
+
+#commentsSection div {
+    border-left: 2px solid #007BFF; /* Bordo a sinistra per i commenti */
+    padding-left: 10px; /* Spaziatura interna a sinistra */
+    margin-bottom: 10px; /* Margine inferiore */
+    font-size: 0.200em; /* Dimensione del testo più piccola */
+    margin-left: 20px; /* Sposta i commenti verso destra */
+}
+
+/* Stile per i singoli articoli */
+.article {
+    border: 1px solid #ddd;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.article h2 {
+    margin-top: 0;
+}
+
+.article p {
+    margin: 4px 0;
+    
+}
+
+/* Stile per i commenti */
+.comment {
+    border-top: 1px solid #ddd;
+    padding: 8px 0;
+    font-size: 0.875em; /* Dimensione del testo più piccola */
+    margin-left: 20px; /* Sposta i commenti verso destra */
+}
+
+.comment p {
+    margin: 4px 0;
+}
+
+/* Stile per il messaggio di errore */
+#errorMessage {
+    color: red;
+    font-weight: bold;
+}
+
+
+/* Stili per i dati dell'autore e della data degli articoli */
+.article-header {
+    color: #888; /* Grigio per il testo */
+    font-size: 1em; /* Dimensione del testo più piccola */
+    margin-bottom: 10px; /* Spazio tra i dati e il titolo */
+}
+
+/* Stili per i dati dell'autore e della data dei commenti */
+.comment-header {
+    color: #888; /* Grigio per il testo */
+    font-size: 0.8em; /* Dimensione del testo più piccola */
+    margin-bottom: 5px; /* Spazio tra i dati e il contenuto del commento */
+}
+
+.hidden {
+    display: none;
+}
+
+/* Stile per i dati dell'autore negli articoli */
+.article p.author {
+    color: gray; /* Colore grigio per il testo */
+    font-size: 0.8em; /* Dimensione del testo più piccola */
+    margin-bottom: 10px; /* Margine inferiore per distanziare dal titolo */
+}
+
+/* Stile per i dati dell'autore nei commenti */
+.comment p.author {
+    color: gray; /* Colore grigio per il testo */
+    font-size: 0.8em; /* Dimensione del testo più piccola */
+    margin-bottom: 5px; /* Margine inferiore per distanziare dal commento */
+}

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Valerissima.com</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module">
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDWM6IllOnsXxCmiINKBoy5Jzv3y3JRqXE",
+  authDomain: "sitovale-308df.firebaseapp.com",
+  projectId: "sitovale-308df",
+  storageBucket: "sitovale-308df.appspot.com",
+  messagingSenderId: "670043888812",
+  appId: "1:670043888812:web:7670a7d506c467c30f5309",
+  measurementId: "G-6RDPF01FKS"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const googleLoginButton = document.getElementById('googleLoginButton');
+    const articleForm = document.getElementById('articleForm');
+    const articleTitle = document.getElementById('articleTitle');
+    const articleContent = document.getElementById('articleContent');
+    const articlesList = document.getElementById('articlesList');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Funzione per verificare se l'utente è autorizzato
+    async function isUserAuthorized(userId) {
+        const userDoc = await getDoc(doc(db, 'authorizedUsers', userId));
+        return userDoc.exists();
+    }
+
+    // Funzione per gestire la visibilità del modulo di pubblicazione
+    async function handleVisibility() {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+
+        if (user) {
+            googleLoginButton.textContent = `Ciao ${user.displayName}!`;
+            googleLoginButton.style.pointerEvents = 'none'; // Disabilita i click
+            errorMessage.style.display = 'none'; // Nasconde il messaggio di errore
+
+            // Controlla se l'utente è autorizzato
+            if (await isUserAuthorized(user.uid)) {
+                articleForm.classList.remove('hidden'); // Mostra il modulo di pubblicazione
+            } else {
+                articleForm.classList.add('hidden'); // Nasconde il modulo di pubblicazione
+            }
+        } else {
+            googleLoginButton.textContent = 'Accedi con Google';
+            googleLoginButton.style.pointerEvents = 'auto'; // Abilita i click
+            errorMessage.style.display = 'block'; // Mostra il messaggio di errore
+            articleForm.classList.add('hidden'); // Nasconde il modulo di pubblicazione
+        }
+    }
+
+    // Esegui la gestione della visibilità al caricamento della pagina
+    await handleVisibility();
+
+    googleLoginButton.addEventListener('click', async (event) => {
+        event.preventDefault(); // Evita che il link agisca come <a>
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            sessionStorage.setItem('user', JSON.stringify(user));
+            await handleVisibility(); // Gestisci la visibilità dopo l'accesso
+        } catch (error) {
+            console.error('Error during sign in: ', error);
+        }
+    });
+
+    // Pubblica un articolo
+    articleForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = articleTitle.value;
+        const content = articleContent.value;
+        const currentUser = JSON.parse(sessionStorage.getItem('user'));
+
+        if (title && content && currentUser) {
+            if (await isUserAuthorized(currentUser.uid)) {
+                try {
+                    await addDoc(collection(db, 'articles'), {
+                        title: title,
+                        content: content,
+                        author: currentUser.displayName,
+                        timestamp: new Date()
+                    });
+                    articleTitle.value = '';
+                    articleContent.value = '';
+                } catch (e) {
+                    console.error('Error adding document: ', e);
+                }
+            } else {
+                alert('Non sei autorizzato a pubblicare articoli.');
+            }
+        } else {
+            alert('Devi effettuare l\'accesso per pubblicare un articolo.');
+        }
+    });
+
+    // Visualizza gli articoli
+    const articlesQuery = query(collection(db, 'articles'), orderBy('timestamp', 'desc'));
+    onSnapshot(articlesQuery, (querySnapshot) => {
+        articlesList.innerHTML = '';
+        querySnapshot.forEach((doc) => {
+            const article = doc.data();
+            const articleElement = document.createElement('div');
+            articleElement.classList.add('article');
+            articleElement.innerHTML = `
+                <p id="author" style="font-size: 14px;color: gray;">da ${article.author} il ${new Date(article.timestamp.seconds * 1000).toLocaleString()}</p>
+                <h2 style="color: #ced78d">${article.title}</h2>
+                <p style="font-size: 18px;">${article.content}</p>
+                <div id="comments-${doc.id}"></div>
+                <textarea id="commentInput-${doc.id}" placeholder="Aggiungi un commento"></textarea>
+                <button onclick="addComment('${doc.id}')">Pubblica commento</button>
+            `;
+            articlesList.appendChild(articleElement);
+
+            // Visualizza i commenti
+            const commentsQuery = query(collection(db, 'comments'), where('articleId', '==', doc.id), orderBy('timestamp', 'desc'));
+            onSnapshot(commentsQuery, (commentSnapshot) => {
+                const commentsDiv = document.getElementById(`comments-${doc.id}`);
+                commentsDiv.innerHTML = '';
+                commentSnapshot.forEach((commentDoc) => {
+                    const comment = commentDoc.data();
+                    const commentElement = document.createElement('div');
+                    commentElement.classList.add('comment');
+                    commentElement.innerHTML = `
+                        <p style="font-size: 14px;color: gray;">Da ${comment.author} il ${new Date(comment.timestamp.seconds * 1000).toLocaleString()}</p>
+                        <p style="font-size: 18px;">${comment.content}</p>
+                    `;
+                    commentsDiv.appendChild(commentElement);
+                });
+            });
+        });
+    });
+
+    // Aggiungi un commento
+    window.addComment = async (articleId) => {
+        const commentInput = document.getElementById(`commentInput-${articleId}`);
+        const content = commentInput.value;
+        const currentUser = JSON.parse(sessionStorage.getItem('user'));
+
+        if (content && currentUser) {
+            try {
+                await addDoc(collection(db, 'comments'), {
+                    articleId: articleId,
+                    content: content,
+                    author: currentUser.displayName,
+                    timestamp: new Date()
+                });
+                commentInput.value = '';
+            } catch (e) {
+                console.error('Error adding comment: ', e);
+            }
+        } else {
+            alert('Devi effettuare l\'accesso per aggiungere un commento.');
+        }
+    };
+});
+
+    </script> 
+</head>
+<body>
+    <div>
+        <navbar id="navbar">
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 20px;">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#">Chi sono (lo dovresti sapere)</a></li>
+            <li><a href="#">Lista regali matrimonio</a></li>
+            <li><a href="#" id="googleLoginButton">Accedi con Google</a></li>
+          </ul>
+        </navbar>
+    </div>
+
+    <section class="image-overlay">
+        <div class="overlay"></div>
+        <div class="content">
+            <h1>V</h1><h1>A</h1><h1>L</h1><h1>E</h1><h1>R</h1><h1>I</h1><h1>S</h1><h1>S</h1><h1>I</h1><h1>M</h1><h1>A</h1>
+            <p style="cursor: context-menu;" class="titolo">Immagina abbia scritto qualcosa di figo</p>
+            <button id="scrollButton"><img src="basso.png"></button>
+        </div>
+    </section>
+
+    <section id="articlesSection">
+        <form id="articleForm">
+            <h2>Diffondi la tua parola al mondo</h2>
+            <input type="text" id="articleTitle" placeholder="Titolo" required>
+            <textarea id="articleContent" placeholder="Scrivi qualcosa che ispiri le masse" required></textarea>
+            <button type="submit">Pubblica</button>
+        </form>
+        <p id="errorMessage" style="color: red; display: none;"></p>
+        <h2>Le uniche storie di cui avrai bisogno.</h2>
+        <div id="articlesList"></div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
